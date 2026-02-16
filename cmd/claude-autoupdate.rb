@@ -40,7 +40,7 @@ module Homebrew
 
         # Validate platform and installation (except for status)
         begin
-          ClaudeAutoupdate::Core.validate! unless subcommand == "status"
+          ::ClaudeAutoupdate::Core.validate! unless subcommand == "status"
         rescue => e
           puts e.message
           exit 1
@@ -50,16 +50,16 @@ module Homebrew
         case subcommand
         when "install"
           require "claude_autoupdate/install"
-          ClaudeAutoupdate::Install.run
+          ::ClaudeAutoupdate::Install.run
         when "uninstall"
           require "claude_autoupdate/uninstall"
-          ClaudeAutoupdate::Uninstall.run
+          ::ClaudeAutoupdate::Uninstall.run
         when "status"
           require "claude_autoupdate/status"
-          ClaudeAutoupdate::Status.run
+          ::ClaudeAutoupdate::Status.run
         when "update"
           require "claude_autoupdate/update"
-          ClaudeAutoupdate::Update.run
+          ::ClaudeAutoupdate::Update.run
         end
       end
 
