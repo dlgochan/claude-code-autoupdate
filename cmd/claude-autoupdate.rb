@@ -89,7 +89,5 @@ module Homebrew
   end
 end
 
-# Run if executed directly
-if __FILE__ == $PROGRAM_NAME
-  Homebrew::Cmd::ClaudeAutoupdate.run
-end
+# Run command
+Homebrew::Cmd::ClaudeAutoupdate.run
