@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Ruby
+*.gem
+.bundle/
+vendor/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Test artifacts
+tmp/

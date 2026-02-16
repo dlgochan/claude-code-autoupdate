@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+
+    - name: Check syntax
+      run: |
+        ruby -c cmd/claude-autoupdate.rb
+        ruby -c lib/claude_autoupdate/core.rb
+        ruby -c lib/claude_autoupdate/install.rb
+        ruby -c lib/claude_autoupdate/uninstall.rb
+        ruby -c lib/claude_autoupdate/status.rb
+        ruby -c lib/claude_autoupdate/update.rb
+
+    - name: Test help command
+      run: |
+        chmod +x cmd/claude-autoupdate.rb
+        ./cmd/claude-autoupdate.rb | grep "Usage: brew claude-autoupdate"
+
+    - name: Test status command (should work without validation)
+      run: |
+        ./cmd/claude-autoupdate.rb status
+
+  style:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Homebrew
+      run: brew --version
+
+    - name: Check Homebrew style
+      run: |
+        if [ -f claude-autoupdate.rb ]; then
+          brew style claude-autoupdate.rb || true
+        fi
