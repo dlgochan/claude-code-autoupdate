@@ -74,7 +74,7 @@ module ClaudeAutoupdate
       puts
       puts "Auto-updates disabled for claude-code."
       puts
-      puts "To re-enable: brew claude-autoupdate install"
+      puts "To re-enable: claude-autoupdate install"
     end
   end
 end

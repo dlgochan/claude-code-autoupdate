@@ -67,7 +67,7 @@ module Homebrew
 
       def print_help
         puts <<~HELP
-          Usage: brew claude-autoupdate <subcommand>
+          Usage: claude-autoupdate <subcommand>
 
           Automatic updates for claude-code Homebrew installations.
 
@@ -78,9 +78,9 @@ module Homebrew
             update      Manually update claude-code now
 
           Examples:
-            brew claude-autoupdate install   # Enable auto-updates
-            brew claude-autoupdate status    # Check status
-            brew claude-autoupdate update    # Update now
+            claude-autoupdate install   # Enable auto-updates
+            claude-autoupdate status    # Check status
+            claude-autoupdate update    # Update now
 
           For more info: https://github.com/dlgochan/claude-code-autoupdate
         HELP

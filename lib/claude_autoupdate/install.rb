@@ -13,7 +13,7 @@ module ClaudeAutoupdate
       # Check if already installed
       if ClaudeAutoupdate::Core.running?
         puts "Auto-updates already enabled for claude-code!"
-        puts "Run 'brew claude-autoupdate status' for details."
+        puts "Run 'claude-autoupdate status' for details."
         exit 0
       end
 
@@ -154,8 +154,8 @@ module ClaudeAutoupdate
       puts "  • Updates run in the background (low priority)"
       puts
       puts "Commands:"
-      puts "  brew claude-autoupdate status  # Check status"
-      puts "  brew claude-autoupdate update   # Update now"
+      puts "  claude-autoupdate status  # Check status"
+      puts "  claude-autoupdate update  # Update now"
       puts
       puts "Logs: #{ClaudeAutoupdate::Core.log_path}"
     end

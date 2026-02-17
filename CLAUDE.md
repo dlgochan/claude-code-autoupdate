@@ -4,7 +4,7 @@
 
 claude-code의 Homebrew 설치판을 위한 자동 업데이트 도구입니다.
 
-**핵심 목표**: 단일 명령어로 자동 업데이트 활성화 (`brew claude-autoupdate install`)
+**핵심 목표**: 단일 명령어로 자동 업데이트 활성화 (`claude-autoupdate install`)
 
 ## 아키텍처
 
