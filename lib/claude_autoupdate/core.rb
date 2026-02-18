@@ -41,12 +41,21 @@ module ClaudeAutoupdate
       `launchctl list`.include?(label_name)
     end
 
-    # Check if native Claude Code installation exists
+    # Check if native Claude Code installation is actively being used
     # Native installations have auto-updates built-in
     def native_installation?
-      native_bin = File.expand_path("~/.local/bin/claude")
-      native_share = File.expand_path("~/.local/share/claude")
-      File.exist?(native_bin) || Dir.exist?(native_share)
+      # Get actual claude executable path (bypass aliases)
+      claude_path = `/bin/bash -c 'which claude' 2>/dev/null`.strip
+
+      return false if claude_path.empty?
+
+      # If using Homebrew path, not native
+      return false if claude_path.include?("/opt/homebrew/") ||
+                     claude_path.include?("/usr/local/") ||
+                     claude_path.include?("/home/linuxbrew/")
+
+      # If using ~/.local/ path, it's native
+      claude_path.include?("/.local/")
     end
 
     # Check if Homebrew installation exists
