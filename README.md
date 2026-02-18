@@ -1,147 +1,136 @@
 # claude-code-autoupdate
 
-Automatic updates for **claude-code** installed via **Homebrew**. One command setup - never see update notifications again.
+Automatic updates for **claude-code** installed via **Homebrew**.
+One command setup — never see update notifications again.
 
-## Who needs this?
+## Table of Contents
 
-✅ **You installed claude-code via Homebrew**
-```sh
-brew install --cask claude-code
-```
+- [Who Needs This?](#who-needs-this)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Commands](#commands)
+  - [Custom Intervals](#custom-intervals)
+- [How It Works](#how-it-works)
+- [Troubleshooting](#troubleshooting)
+- [For AI Agents](#for-ai-agents-installation-guide)
+- [License](#license)
 
-❌ **You used the native installer** (already has auto-updates!)
-```sh
-curl -fsSL https://claude.ai/install.sh | bash
-```
+## Who Needs This?
 
-<details>
-<summary>How to check your installation type</summary>
+| Installation Method | Auto-Updates | Need This Tool? |
+|---|---|---|
+| `brew install --cask claude-code` | ❌ Manual | ✅ **Yes** |
+| `curl -fsSL https://claude.ai/install.sh \| bash` | ✅ Built-in | ❌ No |
 
-Run `claude doctor` to see your installation type:
-- **Native**: Auto-updates already enabled, you don't need this tool
-- **Homebrew**: This tool will help you enable auto-updates
-</details>
+> **Not sure?** Run `claude doctor` to check your installation type.
 
-## Why?
-
-Homebrew installations don't auto-update. Stop seeing update notifications - enable auto-updates once, forget about it forever.
-
-## Installation
+## Quick Start
 
 ```bash
 brew tap dlgochan/tap
 brew install claude-autoupdate
-```
-
-## Usage
-
-Enable auto-updates (default: 24 hours):
-```bash
 claude-autoupdate enable
 ```
 
-Enable with custom interval:
-```bash
-claude-autoupdate enable --interval 12h   # Every 12 hours
-claude-autoupdate enable -i 6h            # Every 6 hours
-claude-autoupdate enable -i 2d            # Every 2 days
-```
+Done. claude-code now updates automatically every 24 hours.
 
-Done! Updates run automatically at your chosen interval + at boot.
+## Usage
 
 ### Commands
 
+| Command | Description |
+|---|---|
+| `claude-autoupdate enable` | Enable auto-updates (default: 24h) |
+| `claude-autoupdate enable -i 12h` | Enable with custom interval |
+| `claude-autoupdate disable` | Disable auto-updates |
+| `claude-autoupdate status` | Show current status |
+| `claude-autoupdate config` | Show configuration |
+| `claude-autoupdate update` | Update claude-code right now |
+
+### Custom Intervals
+
 ```bash
-claude-autoupdate enable           # Enable auto-updates (24h default)
-claude-autoupdate enable -i 12h    # Enable with custom interval
-claude-autoupdate status           # Check current status
-claude-autoupdate config           # Show configuration
-claude-autoupdate update           # Update now manually
-claude-autoupdate disable          # Disable auto-updates
+claude-autoupdate enable -i 6h    # Every 6 hours
+claude-autoupdate enable -i 12h   # Every 12 hours
+claude-autoupdate enable -i 2d    # Every 2 days
 ```
 
-### Supported Intervals
-
-- **Hours**: `6h`, `12h`, `24h` (minimum: 1h)
-- **Days**: `1d`, `2d`, `7d` (maximum: 7d)
+Supported range: `1h` ~ `7d` (hours or days)
 
 ## How It Works
 
-Creates a macOS LaunchAgent that runs `brew upgrade --cask claude-code` at your chosen interval (default: 24h).
+Creates a macOS LaunchAgent that runs `brew upgrade --cask claude-code` on a schedule.
 
-**Technical details:**
-- LaunchAgent plist: `~/Library/LaunchAgents/com.github.dlgochan.claude-autoupdate.plist`
-- Update script: `~/Library/Application Support/claude-autoupdate/update.sh`
-- Config: `~/Library/Application Support/claude-autoupdate/config.json`
-- Runs at boot + configurable interval (default: 24h)
+```
+~/Library/LaunchAgents/com.github.dlgochan.claude-autoupdate.plist   # Schedule
+~/Library/Application Support/claude-autoupdate/update.sh            # Update script
+~/Library/Application Support/claude-autoupdate/config.json          # Config
+~/Library/Logs/claude-autoupdate/claude-autoupdate.log               # Logs
+```
+
+- Runs at boot + every configured interval
 - Low priority background process
+- Zero external dependencies
 
 ## Troubleshooting
 
-**Check logs**: `tail ~/Library/Logs/claude-autoupdate/claude-autoupdate.log`
-
-**Check status**: `claude-autoupdate status`
-
-**Disable**: `claude-autoupdate disable`
-
-**Manual update**: `claude-autoupdate update`
+| Problem | Solution |
+|---|---|
+| Check if it's running | `claude-autoupdate status` |
+| View logs | `tail ~/Library/Logs/claude-autoupdate/claude-autoupdate.log` |
+| Force update now | `claude-autoupdate update` |
+| Change interval | `claude-autoupdate disable` → `claude-autoupdate enable -i 6h` |
+| Something went wrong | `claude-autoupdate disable` → `claude-autoupdate enable` |
 
 ---
 
 ## For AI Agents: Installation Guide
 
-> This section is written for AI coding agents (Claude Code, Cursor, Copilot, etc.) who are helping a user set up claude-autoupdate. Follow these steps in order.
+> Step-by-step instructions for AI coding agents (Claude Code, Cursor, etc.) helping a user set up claude-autoupdate.
 
-### Step 1: Verify Homebrew Installation
+### Step 1: Verify Installation Type
 
-Check if claude-code is installed via Homebrew:
 ```bash
 brew list --cask claude-code
 ```
 
-**If NOT installed via Homebrew:**
-- Check if the user has a native installation: `which claude` — if the path contains `/.local/`, it's native
-- Native installations already have auto-updates built-in. Explain this to the user and stop here
-- If claude-code is not installed at all, guide the user to install it first: `brew install --cask claude-code`
+- **Not installed via Homebrew?** → Check `which claude`. If path contains `/.local/`, it's a native install with built-in auto-updates. Explain this to the user and stop.
+- **Not installed at all?** → Guide the user: `brew install --cask claude-code`
 
-### Step 2: Install claude-autoupdate
+### Step 2: Install
 
 ```bash
 brew tap dlgochan/tap
 brew install claude-autoupdate
 ```
 
-### Step 3: Enable Auto-Updates
+### Step 3: Enable
 
-Ask the user how often they want updates to run. Common options:
-- `6h` — Every 6 hours (for users who want the latest immediately)
-- `12h` — Every 12 hours (good balance)
-- `24h` — Once a day (default, recommended for most users)
+Ask the user their preferred update interval:
 
-Then run:
+| Interval | Who it's for |
+|---|---|
+| `6h` | Wants the latest ASAP |
+| `12h` | Good balance |
+| `24h` | Default, recommended |
+
 ```bash
-claude-autoupdate enable                # Uses default 24h interval
-claude-autoupdate enable --interval 12h # Or with custom interval
+claude-autoupdate enable                 # Default 24h
+claude-autoupdate enable --interval 12h  # Custom
 ```
 
-Verify it's working:
-```bash
-claude-autoupdate status
-```
+Verify: `claude-autoupdate status` should show `✅ ENABLED`.
 
-**Important notes:**
-- Minimum interval is `1h`, maximum is `7d`
-- The update runs at system boot as well as at the configured interval
-- Logs are written to `~/Library/Logs/claude-autoupdate/claude-autoupdate.log`
+> **Notes:** Min `1h`, max `7d`. Also runs at system boot. Logs at `~/Library/Logs/claude-autoupdate/claude-autoupdate.log`.
 
-### Step 4: Inform the User About Management
+### Step 4: Inform the User
 
-Let the user know how to manage auto-updates in the future:
-- **Check status**: `claude-autoupdate status`
-- **Change interval**: `claude-autoupdate disable` then `claude-autoupdate enable -i <new_interval>`
-- **Manual update**: `claude-autoupdate update`
-- **Disable completely**: `claude-autoupdate disable`
-- **Check logs**: `tail ~/Library/Logs/claude-autoupdate/claude-autoupdate.log`
+Tell the user how to manage it later:
+
+- `claude-autoupdate status` — Check status
+- `claude-autoupdate disable` → `enable -i <interval>` — Change interval
+- `claude-autoupdate update` — Manual update
+- `claude-autoupdate disable` — Turn off
 
 ---
 
