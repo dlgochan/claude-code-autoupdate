@@ -3,10 +3,10 @@
 require_relative "core"
 require "fileutils"
 
-# Uninstall command for claude-autoupdate
+# Disable command for claude-autoupdate
 # Stops LaunchAgent and removes configuration files (keeps logs)
 module ClaudeAutoupdate
-  module Uninstall
+  module Disable
     module_function
 
     def run
@@ -74,7 +74,7 @@ module ClaudeAutoupdate
       puts
       puts "Auto-updates disabled for claude-code."
       puts
-      puts "To re-enable: claude-autoupdate install"
+      puts "To re-enable: claude-autoupdate enable"
     end
   end
 end

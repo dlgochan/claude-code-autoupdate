@@ -4,7 +4,7 @@
 
 claude-code의 Homebrew 설치판을 위한 자동 업데이트 도구입니다.
 
-**핵심 목표**: 단일 명령어로 자동 업데이트 활성화 (`claude-autoupdate install`)
+**핵심 목표**: 단일 명령어로 자동 업데이트 활성화 (`claude-autoupdate enable`)
 
 ## 아키텍처
 
@@ -13,8 +13,8 @@ claude-code의 Homebrew 설치판을 위한 자동 업데이트 도구입니다.
 cmd/claude-autoupdate.rb          # CLI 진입점 (subcommand 파싱)
 lib/claude_autoupdate/
   ├── core.rb                     # 경로 관리, 설치 감지, 검증
-  ├── install.rb                  # plist/script 생성 + launchctl load
-  ├── uninstall.rb                # launchctl unload + 파일 제거
+  ├── enable.rb                   # plist/script 생성 + launchctl load
+  ├── disable.rb                  # launchctl unload + 파일 제거
   ├── status.rb                   # 상태 조회 + 로그 파싱
   └── update.rb                   # 수동 업데이트 실행
 ```

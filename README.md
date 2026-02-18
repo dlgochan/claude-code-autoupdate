@@ -37,7 +37,7 @@ brew install claude-autoupdate
 
 Enable auto-updates:
 ```bash
-claude-autoupdate install
+claude-autoupdate enable
 ```
 
 Done! Updates run every 24 hours + at boot.
@@ -45,10 +45,10 @@ Done! Updates run every 24 hours + at boot.
 ### Commands
 
 ```bash
-claude-autoupdate install     # Enable auto-updates
+claude-autoupdate enable      # Enable auto-updates
 claude-autoupdate status      # Check current status
 claude-autoupdate update      # Update now manually
-claude-autoupdate uninstall   # Disable auto-updates
+claude-autoupdate disable     # Disable auto-updates
 ```
 
 ## How It Works
@@ -67,7 +67,7 @@ Creates a macOS LaunchAgent that runs `brew upgrade --cask claude-code` every 24
 
 **Check status**: `claude-autoupdate status`
 
-**Disable temporarily**: `claude-autoupdate uninstall`
+**Disable**: `claude-autoupdate disable`
 
 **Manual update**: `claude-autoupdate update`
 

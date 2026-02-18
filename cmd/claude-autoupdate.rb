@@ -15,7 +15,7 @@ require "claude_autoupdate/core"
 module Homebrew
   module Cmd
     class ClaudeAutoupdate
-      SUBCOMMANDS = %w[install uninstall status update].freeze
+      SUBCOMMANDS = %w[enable disable status update].freeze
 
       def self.run
         new.run
@@ -48,12 +48,12 @@ module Homebrew
 
         # Lazy-load implementation
         case subcommand
-        when "install"
-          require "claude_autoupdate/install"
-          ::ClaudeAutoupdate::Install.run
-        when "uninstall"
-          require "claude_autoupdate/uninstall"
-          ::ClaudeAutoupdate::Uninstall.run
+        when "enable"
+          require "claude_autoupdate/enable"
+          ::ClaudeAutoupdate::Enable.run
+        when "disable"
+          require "claude_autoupdate/disable"
+          ::ClaudeAutoupdate::Disable.run
         when "status"
           require "claude_autoupdate/status"
           ::ClaudeAutoupdate::Status.run
@@ -72,15 +72,16 @@ module Homebrew
           Automatic updates for claude-code Homebrew installations.
 
           Subcommands:
-            install     Enable auto-updates (24h interval + boot)
-            uninstall   Disable auto-updates and cleanup
+            enable      Enable auto-updates (24h interval + boot)
+            disable     Disable auto-updates and cleanup
             status      Show current auto-update status
             update      Manually update claude-code now
 
           Examples:
-            claude-autoupdate install   # Enable auto-updates
+            claude-autoupdate enable    # Enable auto-updates
             claude-autoupdate status    # Check status
             claude-autoupdate update    # Update now
+            claude-autoupdate disable   # Disable auto-updates
 
           For more info: https://github.com/dlgochan/claude-code-autoupdate
         HELP

@@ -3,15 +3,15 @@
 require_relative "core"
 require "fileutils"
 
-# Installation command for claude-autoupdate
+# Enable command for claude-autoupdate
 # Creates LaunchAgent plist and update script, then loads via launchctl
 module ClaudeAutoupdate
-  module Install
+  module Enable
     module_function
 
     def run
       # Check if already installed
-      if ClaudeAutoupdate::Core.running?
+      if ::ClaudeAutoupdate::Core.running?
         puts "Auto-updates already enabled for claude-code!"
         puts "Run 'claude-autoupdate status' for details."
         exit 0
@@ -154,8 +154,9 @@ module ClaudeAutoupdate
       puts "  • Updates run in the background (low priority)"
       puts
       puts "Commands:"
-      puts "  claude-autoupdate status  # Check status"
-      puts "  claude-autoupdate update  # Update now"
+      puts "  claude-autoupdate status   # Check status"
+      puts "  claude-autoupdate update   # Update now"
+      puts "  claude-autoupdate disable  # Disable auto-updates"
       puts
       puts "Logs: #{ClaudeAutoupdate::Core.log_path}"
     end

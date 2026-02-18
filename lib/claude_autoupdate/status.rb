@@ -39,7 +39,7 @@ module ClaudeAutoupdate
       puts "Status: ❌ DISABLED"
       puts
       puts "Auto-updates are not enabled."
-      puts "Run 'claude-autoupdate install' to enable."
+      puts "Run 'claude-autoupdate enable' to enable."
     end
 
     def show_run_times
