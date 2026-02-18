@@ -4,23 +4,25 @@ require_relative "core"
 require_relative "config"
 require "time"
 
-# Status reporting for claude-autoupdate
-# Shows current state, last run time, next run estimate
+# 현재 상태, 마지막 실행 시간, 다음 실행 시간 표시
 module ClaudeAutoupdate
   module Status
     module_function
 
     def run
-      if ClaudeAutoupdate::Core.running?
+      if Core.running?
         show_enabled_status
       else
-        show_disabled_status
+        puts "Status: ❌ DISABLED"
+        puts
+        puts "Auto-updates are not enabled."
+        puts "Run 'claude-autoupdate enable' to enable."
       end
     end
 
     def show_enabled_status
-      config = ::ClaudeAutoupdate::Config.load
-      interval_str = ::ClaudeAutoupdate::Config.format_interval(config["interval_seconds"])
+      config = Config.load
+      interval_str = Config.format_interval(config["interval_seconds"])
 
       puts "Status: ✅ ENABLED"
       puts
@@ -34,63 +36,45 @@ module ClaudeAutoupdate
 
       puts
       puts "Files:"
-      puts "  LaunchAgent: #{::ClaudeAutoupdate::Core.plist_path}"
-      puts "  Script: #{::ClaudeAutoupdate::Core.script_path}"
-      puts "  Log: #{::ClaudeAutoupdate::Core.log_path}"
-    end
-
-    def show_disabled_status
-      puts "Status: ❌ DISABLED"
-      puts
-      puts "Auto-updates are not enabled."
-      puts "Run 'claude-autoupdate enable' to enable."
+      puts "  LaunchAgent: #{Core.plist_path}"
+      puts "  Script: #{Core.script_path}"
+      puts "  Log: #{Core.log_path}"
     end
 
     def show_run_times(interval_seconds)
-      last_run = get_last_run_time
+      last_run = parse_last_run_time
       interval_hours = interval_seconds / 3600.0
 
-      if last_run
-        puts "Last run: #{last_run.strftime('%Y-%m-%d %H:%M:%S')}"
-
-        next_run = last_run + interval_seconds
-        now = Time.now
-
-        if next_run > now
-          hours_until = ((next_run - now) / 3600).round(1)
-          puts "Next run: #{next_run.strftime('%Y-%m-%d %H:%M:%S')} (in ~#{hours_until} hours)"
-        else
-          puts "Next run: Soon (overdue)"
-        end
-      else
-        puts "Last run: Never (will run at next boot or in #{interval_hours} hours)"
+      unless last_run
+        puts "Last run: Never"
         puts "Next run: At system boot or within #{interval_hours} hours"
+        return
+      end
+
+      puts "Last run: #{last_run.strftime('%Y-%m-%d %H:%M:%S')}"
+
+      next_run = last_run + interval_seconds
+      if next_run > Time.now
+        hours_until = ((next_run - Time.now) / 3600).round(1)
+        puts "Next run: #{next_run.strftime('%Y-%m-%d %H:%M:%S')} (in ~#{hours_until} hours)"
+      else
+        puts "Next run: Soon (overdue)"
       end
     end
 
-    def get_last_run_time
-      log_path = ClaudeAutoupdate::Core.log_path
+    # 로그에서 마지막 실행 시간을 파싱
+    # 로그 형식: [Tue Feb 18 15:57:46 KST 2026] Starting claude-code update check...
+    def parse_last_run_time
+      return nil unless File.exist?(Core.log_path)
 
-      return nil unless File.exist?(log_path)
-
-      # Parse log file for last timestamp
-      # Format: [Mon Jan 13 14:30:00 KST 2026] Starting claude-code update check...
       last_timestamp = nil
-
-      File.readlines(log_path).each do |line|
+      File.readlines(Core.log_path).each do |line|
         if line =~ /^\[(.+?)\] Starting claude-code update check/
-          timestamp_str = $1
-          begin
-            last_timestamp = Time.parse(timestamp_str)
-          rescue ArgumentError
-            # Skip invalid timestamps
-            next
-          end
+          last_timestamp = Time.parse($1) rescue next
         end
       end
-
       last_timestamp
-    rescue => e
+    rescue StandardError
       nil
     end
   end

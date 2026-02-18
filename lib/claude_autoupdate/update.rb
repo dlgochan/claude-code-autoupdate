@@ -2,8 +2,7 @@
 
 require_relative "core"
 
-# Manual update command for claude-autoupdate
-# Immediately updates claude-code via Homebrew
+# brew upgrade --cask claude-code를 즉시 실행
 module ClaudeAutoupdate
   module Update
     module_function
@@ -12,59 +11,28 @@ module ClaudeAutoupdate
       puts "Updating claude-code now..."
       puts
 
-      # Get current version
-      current_version = get_current_version
-
-      if current_version
-        puts "Current version: #{current_version}"
-      end
-
+      current = get_version
+      puts "Current version: #{current}" if current
       puts
 
-      # Run update
-      run_update
+      system("brew", "upgrade", "--cask", "claude-code")
 
-      # Get new version
-      new_version = get_current_version
-
+      new_ver = get_version
       puts
-      if new_version && new_version != current_version
-        puts "✅ Updated to version #{new_version}"
-      elsif new_version == current_version
-        puts "✅ Already up to date (#{new_version})"
+      if new_ver && new_ver != current
+        puts "✅ Updated to version #{new_ver}"
+      elsif new_ver
+        puts "✅ Already up to date (#{new_ver})"
       else
         puts "✅ Update complete"
       end
 
-      # Cleanup
-      run_cleanup
-    end
-
-    def get_current_version
-      version_output = `brew info --cask claude-code 2>/dev/null`
-
-      # Parse version from output
-      # Format: "claude-code: 1.2.3 (auto_updates)"
-      if version_output =~ /claude-code:\s+(\S+)/
-        $1
-      else
-        nil
-      end
-    end
-
-    def run_update
-      puts "Running: brew upgrade --cask claude-code"
-      puts
-
-      # Run upgrade (show output to user)
-      system("brew", "upgrade", "--cask", "claude-code")
-    end
-
-    def run_cleanup
-      puts
-      puts "Cleaning up..."
       system("brew", "cleanup", "claude-code", out: File::NULL, err: File::NULL)
-      puts "✓ Cleanup complete"
+    end
+
+    def get_version
+      output = `brew info --cask claude-code 2>/dev/null`
+      $1 if output =~ /claude-code:\s+(\S+)/
     end
   end
 end

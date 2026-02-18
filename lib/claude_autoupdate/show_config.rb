@@ -3,34 +3,31 @@
 require_relative "core"
 require_relative "config"
 
-# Show configuration command for claude-autoupdate
-# Displays current configuration settings
+# 현재 설정 표시
 module ClaudeAutoupdate
   module ShowConfig
     module_function
 
     def run
-      config = ::ClaudeAutoupdate::Config.load
+      config = Config.load
 
       puts "Configuration:"
       puts
-      puts "  Update interval: #{config['interval']} (#{::ClaudeAutoupdate::Config.format_interval(config['interval_seconds'])})"
-      puts "  Interval (seconds): #{config['interval_seconds']}"
-      puts
-      puts "  Config file: #{::ClaudeAutoupdate::Config.config_path}"
+      puts "  Update interval: #{config['interval']} (#{Config.format_interval(config['interval_seconds'])})"
+      puts "  Config file: #{Config.config_path}"
       puts
 
-      if ::ClaudeAutoupdate::Core.running?
+      if Core.running?
         puts "Status: ✅ ENABLED"
         puts
         puts "To change interval:"
-        puts "  1. Disable: claude-autoupdate disable"
-        puts "  2. Re-enable with new interval: claude-autoupdate enable --interval 12h"
+        puts "  claude-autoupdate disable"
+        puts "  claude-autoupdate enable -i 12h"
       else
         puts "Status: ❌ DISABLED"
         puts
-        puts "To enable with custom interval:"
-        puts "  claude-autoupdate enable --interval 12h"
+        puts "To enable:"
+        puts "  claude-autoupdate enable -i 12h"
       end
     end
   end

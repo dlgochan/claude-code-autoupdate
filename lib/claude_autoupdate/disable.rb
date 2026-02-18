@@ -3,78 +3,33 @@
 require_relative "core"
 require "fileutils"
 
-# Disable command for claude-autoupdate
-# Stops LaunchAgent and removes configuration files (keeps logs)
+# LaunchAgent를 정지하고 설정 파일을 제거 (로그는 보존)
 module ClaudeAutoupdate
   module Disable
     module_function
 
     def run
-      unless ClaudeAutoupdate::Core.running?
-        puts "Auto-updates are not enabled."
-        puts "Nothing to uninstall."
+      unless Core.running?
+        puts "Auto-updates are not enabled. Nothing to disable."
         exit 0
       end
 
       puts "Disabling auto-updates for claude-code..."
       puts
 
-      # Unload LaunchAgent
-      unload_launchagent
-
-      # Remove plist
-      remove_plist
-
-      # Remove script directory
-      remove_scripts
-
-      # Keep logs for user reference
-      preserve_logs
-
-      print_success
-    end
-
-    def unload_launchagent
-      plist_path = ClaudeAutoupdate::Core.plist_path
-
-      unless system("launchctl", "unload", plist_path)
-        warn "Warning: Failed to unload LaunchAgent (may not be running)"
-      end
-
+      system("launchctl", "unload", Core.plist_path)
       puts "✓ Stopped LaunchAgent"
-    end
 
-    def remove_plist
-      plist_path = ClaudeAutoupdate::Core.plist_path
+      File.delete(Core.plist_path) if File.exist?(Core.plist_path)
+      puts "✓ Removed LaunchAgent plist"
 
-      if File.exist?(plist_path)
-        File.delete(plist_path)
-        puts "✓ Removed LaunchAgent plist"
-      end
-    end
+      FileUtils.rm_rf(Core.script_dir) if Dir.exist?(Core.script_dir)
+      puts "✓ Removed scripts and config"
 
-    def remove_scripts
-      script_dir = ClaudeAutoupdate::Core.script_dir
+      puts "✓ Logs preserved at #{Core.log_path}" if File.exist?(Core.log_path)
 
-      if Dir.exist?(script_dir)
-        FileUtils.rm_rf(script_dir)
-        puts "✓ Removed scripts"
-      end
-    end
-
-    def preserve_logs
-      log_path = ClaudeAutoupdate::Core.log_path
-
-      if File.exist?(log_path)
-        puts "✓ Logs preserved at #{log_path}"
-      end
-    end
-
-    def print_success
       puts
-      puts "Auto-updates disabled for claude-code."
-      puts
-      puts "To re-enable: claude-autoupdate enable"
+      puts "Auto-updates disabled. To re-enable: claude-autoupdate enable"
     end
   end
 end

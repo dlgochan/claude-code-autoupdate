@@ -1,15 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# External command for Homebrew: brew claude-autoupdate
-# Enables automatic updates for claude-code Homebrew installations
+# CLI 진입점: subcommand 파싱 및 검증 후 해당 모듈로 위임
 
 require "pathname"
 
-# Add lib directory to load path
-HOMEBREW_LIBRARY_PATH = Pathname(__FILE__).dirname.parent.join("lib").freeze
-$LOAD_PATH.unshift(HOMEBREW_LIBRARY_PATH) unless $LOAD_PATH.include?(HOMEBREW_LIBRARY_PATH)
-
+$LOAD_PATH.unshift(Pathname(__FILE__).dirname.parent.join("lib").to_s)
 require "claude_autoupdate/core"
 
 module Homebrew
@@ -22,15 +18,12 @@ module Homebrew
       end
 
       def run
-        # Show help if no subcommand provided
         if ARGV.empty?
           print_help
           exit 0
         end
 
         subcommand = ARGV.first
-
-        # Validate subcommand
         unless SUBCOMMANDS.include?(subcommand)
           puts "Error: Unknown subcommand '#{subcommand}'"
           puts
@@ -38,7 +31,6 @@ module Homebrew
           exit 1
         end
 
-        # Validate platform and installation (except for status and config)
         begin
           ::ClaudeAutoupdate::Core.validate! unless %w[status config].include?(subcommand)
         rescue => e
@@ -46,10 +38,12 @@ module Homebrew
           exit 1
         end
 
-        # Parse flags
-        flags = parse_flags(ARGV[1..-1])
+        dispatch(subcommand, parse_flags(ARGV[1..]))
+      end
 
-        # Lazy-load implementation
+      private
+
+      def dispatch(subcommand, flags)
         case subcommand
         when "enable"
           require "claude_autoupdate/enable"
@@ -69,12 +63,9 @@ module Homebrew
         end
       end
 
-      private
-
       def parse_flags(args)
         flags = {}
         i = 0
-
         while i < args.length
           case args[i]
           when "--interval", "-i"
@@ -84,7 +75,6 @@ module Homebrew
             i += 1
           end
         end
-
         flags
       end
 
@@ -95,34 +85,29 @@ module Homebrew
           Automatic updates for claude-code Homebrew installations.
 
           Subcommands:
-            enable      Enable auto-updates (default: 24h interval + boot)
+            enable      Enable auto-updates (default: 24h interval)
             disable     Disable auto-updates and cleanup
             status      Show current auto-update status
             update      Manually update claude-code now
             config      Show current configuration
 
           Options:
-            --interval, -i INTERVAL    Set update interval (e.g., 6h, 12h, 24h, 2d)
+            --interval, -i    Set update interval (e.g., 6h, 12h, 24h, 2d)
 
           Examples:
-            claude-autoupdate enable              # Enable with default (24h)
-            claude-autoupdate enable -i 12h       # Enable with 12 hour interval
-            claude-autoupdate enable -i 6h        # Enable with 6 hour interval
-            claude-autoupdate status              # Check status
-            claude-autoupdate config              # Show configuration
-            claude-autoupdate update              # Update now
-            claude-autoupdate disable             # Disable auto-updates
+            claude-autoupdate enable              # Default 24h
+            claude-autoupdate enable -i 12h       # Every 12 hours
+            claude-autoupdate enable -i 6h        # Every 6 hours
+            claude-autoupdate status
+            claude-autoupdate disable
 
-          Supported interval formats:
-            6h, 12h, 24h    Hours (minimum: 1h)
-            1d, 2d, 7d      Days (maximum: 7d)
+          Supported intervals: 1h ~ 7d (hours or days)
 
-          For more info: https://github.com/dlgochan/claude-code-autoupdate
+          https://github.com/dlgochan/claude-code-autoupdate
         HELP
       end
     end
   end
 end
 
-# Run command
 Homebrew::Cmd::ClaudeAutoupdate.run

@@ -3,24 +3,24 @@
 require "json"
 require "fileutils"
 
-# Configuration management for claude-autoupdate
-# Stores user preferences like update interval
+# 설정 관리 (update interval 등)
+# 설정 파일: ~/Library/Application Support/claude-autoupdate/config.json
 module ClaudeAutoupdate
   module Config
     module_function
 
-    # Default configuration
     DEFAULTS = {
       "interval" => "24h",
       "interval_seconds" => 86_400
     }.freeze
 
-    # Get configuration file path
+    MIN_SECONDS = 3_600    # 1 hour
+    MAX_SECONDS = 604_800  # 7 days
+
     def config_path
       File.expand_path("~/Library/Application Support/claude-autoupdate/config.json")
     end
 
-    # Load configuration from file
     def load
       return DEFAULTS.dup unless File.exist?(config_path)
 
@@ -29,76 +29,48 @@ module ClaudeAutoupdate
       DEFAULTS.dup
     end
 
-    # Save configuration to file
     def save(config)
       FileUtils.mkdir_p(File.dirname(config_path))
       File.write(config_path, JSON.pretty_generate(config))
     end
 
-    # Get a configuration value
-    def get(key)
-      load[key]
-    end
+    # "6h" → 21600, "2d" → 172800
+    def parse_interval(str)
+      str = str.to_s.strip.downcase
 
-    # Set a configuration value
-    def set(key, value)
-      config = load
-      config[key] = value
-      save(config)
-    end
+      seconds = case str
+                when /^(\d+)h$/ then $1.to_i * 3_600
+                when /^(\d+)d$/ then $1.to_i * 86_400
+                when /^(\d+)$/  then $1.to_i
+                else
+                  raise ArgumentError, "Invalid interval format: #{str}. Use format like: 6h, 12h, 24h, 1d, 2d"
+                end
 
-    # Parse interval string to seconds
-    # Supports: 6h, 12h, 24h, 1d, 2d, etc.
-    def parse_interval(interval_str)
-      interval_str = interval_str.to_s.strip.downcase
-
-      case interval_str
-      when /^(\d+)h$/
-        hours = $1.to_i
-        validate_interval_range!(hours * 3600, interval_str)
-      when /^(\d+)d$/
-        days = $1.to_i
-        validate_interval_range!(days * 86_400, interval_str)
-      when /^(\d+)$/
-        seconds = $1.to_i
-        validate_interval_range!(seconds, interval_str)
-      else
-        raise ArgumentError, "Invalid interval format: #{interval_str}. Use format like: 6h, 12h, 24h, 1d, 2d"
+      if seconds < MIN_SECONDS
+        raise ArgumentError, "Interval too short: #{str}. Minimum is 1h."
       end
-    end
-
-    # Validate interval is within reasonable range
-    def validate_interval_range!(seconds, original_str)
-      min_seconds = 3600        # 1 hour
-      max_seconds = 604_800     # 7 days
-
-      if seconds < min_seconds
-        raise ArgumentError, "Interval too short: #{original_str}. Minimum is 1h (1 hour)."
-      end
-
-      if seconds > max_seconds
-        raise ArgumentError, "Interval too long: #{original_str}. Maximum is 7d (7 days)."
+      if seconds > MAX_SECONDS
+        raise ArgumentError, "Interval too long: #{str}. Maximum is 7d."
       end
 
       seconds
     end
 
-    # Format seconds to human-readable string
+    # 86400 → "1 day", 43200 → "12 hours"
     def format_interval(seconds)
       seconds = seconds.to_i
 
-      if seconds % 86_400 == 0
+      if (seconds % 86_400).zero?
         days = seconds / 86_400
         "#{days} day#{'s' if days != 1}"
-      elsif seconds % 3600 == 0
-        hours = seconds / 3600
+      elsif (seconds % 3_600).zero?
+        hours = seconds / 3_600
         "#{hours} hour#{'s' if hours != 1}"
       else
         "#{seconds} seconds"
       end
     end
 
-    # Update interval configuration
     def update_interval(interval_str)
       seconds = parse_interval(interval_str)
       config = load
