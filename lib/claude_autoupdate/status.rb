@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "core"
+require_relative "config"
 require "time"
 
 # Status reporting for claude-autoupdate
@@ -18,21 +19,24 @@ module ClaudeAutoupdate
     end
 
     def show_enabled_status
+      config = ::ClaudeAutoupdate::Config.load
+      interval_str = ::ClaudeAutoupdate::Config.format_interval(config["interval_seconds"])
+
       puts "Status: ✅ ENABLED"
       puts
       puts "Configuration:"
-      puts "  Interval: 24 hours (86400 seconds)"
+      puts "  Interval: #{interval_str} (#{config['interval_seconds']} seconds)"
       puts "  Runs at boot: Yes"
       puts "  Priority: Low (background)"
       puts
 
-      show_run_times
+      show_run_times(config["interval_seconds"])
 
       puts
       puts "Files:"
-      puts "  LaunchAgent: #{ClaudeAutoupdate::Core.plist_path}"
-      puts "  Script: #{ClaudeAutoupdate::Core.script_path}"
-      puts "  Log: #{ClaudeAutoupdate::Core.log_path}"
+      puts "  LaunchAgent: #{::ClaudeAutoupdate::Core.plist_path}"
+      puts "  Script: #{::ClaudeAutoupdate::Core.script_path}"
+      puts "  Log: #{::ClaudeAutoupdate::Core.log_path}"
     end
 
     def show_disabled_status
@@ -42,13 +46,14 @@ module ClaudeAutoupdate
       puts "Run 'claude-autoupdate enable' to enable."
     end
 
-    def show_run_times
+    def show_run_times(interval_seconds)
       last_run = get_last_run_time
+      interval_hours = interval_seconds / 3600.0
 
       if last_run
         puts "Last run: #{last_run.strftime('%Y-%m-%d %H:%M:%S')}"
 
-        next_run = last_run + 86400 # 24 hours
+        next_run = last_run + interval_seconds
         now = Time.now
 
         if next_run > now
@@ -58,8 +63,8 @@ module ClaudeAutoupdate
           puts "Next run: Soon (overdue)"
         end
       else
-        puts "Last run: Never (will run at next boot or in 24 hours)"
-        puts "Next run: At system boot or within 24 hours"
+        puts "Last run: Never (will run at next boot or in #{interval_hours} hours)"
+        puts "Next run: At system boot or within #{interval_hours} hours"
       end
     end
 

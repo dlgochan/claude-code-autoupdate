@@ -35,21 +35,35 @@ brew install claude-autoupdate
 
 ## Usage
 
-Enable auto-updates:
+Enable auto-updates (default: 24 hours):
 ```bash
 claude-autoupdate enable
 ```
 
-Done! Updates run every 24 hours + at boot.
+Enable with custom interval:
+```bash
+claude-autoupdate enable --interval 12h   # Every 12 hours
+claude-autoupdate enable -i 6h            # Every 6 hours
+claude-autoupdate enable -i 2d            # Every 2 days
+```
+
+Done! Updates run automatically at your chosen interval + at boot.
 
 ### Commands
 
 ```bash
-claude-autoupdate enable      # Enable auto-updates
-claude-autoupdate status      # Check current status
-claude-autoupdate update      # Update now manually
-claude-autoupdate disable     # Disable auto-updates
+claude-autoupdate enable           # Enable auto-updates (24h default)
+claude-autoupdate enable -i 12h    # Enable with custom interval
+claude-autoupdate status           # Check current status
+claude-autoupdate config           # Show configuration
+claude-autoupdate update           # Update now manually
+claude-autoupdate disable          # Disable auto-updates
 ```
+
+### Supported Intervals
+
+- **Hours**: `6h`, `12h`, `24h` (minimum: 1h)
+- **Days**: `1d`, `2d`, `7d` (maximum: 7d)
 
 ## How It Works
 

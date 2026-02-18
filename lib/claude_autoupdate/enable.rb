@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "core"
+require_relative "config"
 require "fileutils"
 
 # Enable command for claude-autoupdate
@@ -9,12 +10,27 @@ module ClaudeAutoupdate
   module Enable
     module_function
 
-    def run
+    def run(interval: nil)
       # Check if already installed
       if ::ClaudeAutoupdate::Core.running?
         puts "Auto-updates already enabled for claude-code!"
         puts "Run 'claude-autoupdate status' for details."
         exit 0
+      end
+
+      # Parse and save interval configuration
+      if interval
+        begin
+          ::ClaudeAutoupdate::Config.update_interval(interval)
+          puts "Using custom interval: #{interval}"
+        rescue ArgumentError => e
+          puts "Error: #{e.message}"
+          exit 1
+        end
+      else
+        # Ensure default config exists
+        config = ::ClaudeAutoupdate::Config.load
+        ::ClaudeAutoupdate::Config.save(config)
       end
 
       puts "Setting up auto-updates for claude-code..."
@@ -84,9 +100,13 @@ module ClaudeAutoupdate
     end
 
     def generate_plist
-      script_path = ClaudeAutoupdate::Core.script_path
-      log_path = ClaudeAutoupdate::Core.log_path
-      label = ClaudeAutoupdate::Core.label_name
+      script_path = ::ClaudeAutoupdate::Core.script_path
+      log_path = ::ClaudeAutoupdate::Core.log_path
+      label = ::ClaudeAutoupdate::Core.label_name
+
+      # Get interval from config
+      config = ::ClaudeAutoupdate::Config.load
+      interval_seconds = config["interval_seconds"]
 
       <<~PLIST
         <?xml version="1.0" encoding="UTF-8"?>
@@ -106,7 +126,7 @@ module ClaudeAutoupdate
           <true/>
 
           <key>StartInterval</key>
-          <integer>86400</integer>
+          <integer>#{interval_seconds}</integer>
 
           <key>StandardErrorPath</key>
           <string>#{log_path}</string>
@@ -145,20 +165,24 @@ module ClaudeAutoupdate
     end
 
     def print_success
+      config = ::ClaudeAutoupdate::Config.load
+      interval_str = ::ClaudeAutoupdate::Config.format_interval(config["interval_seconds"])
+
       puts
       puts "🎉 Auto-updates enabled for claude-code!"
       puts
       puts "What happens now:"
-      puts "  • Updates run every 24 hours"
+      puts "  • Updates run every #{interval_str}"
       puts "  • Updates run at system boot"
       puts "  • Updates run in the background (low priority)"
       puts
       puts "Commands:"
       puts "  claude-autoupdate status   # Check status"
       puts "  claude-autoupdate update   # Update now"
+      puts "  claude-autoupdate config   # Show configuration"
       puts "  claude-autoupdate disable  # Disable auto-updates"
       puts
-      puts "Logs: #{ClaudeAutoupdate::Core.log_path}"
+      puts "Logs: #{::ClaudeAutoupdate::Core.log_path}"
     end
   end
 end
